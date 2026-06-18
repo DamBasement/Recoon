@@ -1,4 +1,6 @@
 # RECOON
+<img width="1374" height="693" alt="recoon" src="https://github.com/user-attachments/assets/b7c69fae-4408-4241-9920-2c129afda391" />
+
 
 A Python script that uses an LLM (locally via Ollama, free, or the Claude API as a paid option) to take a first pass at huge lists of recon URLs and flag the most interesting ones to investigate manually during a bug bounty engagement.
 
