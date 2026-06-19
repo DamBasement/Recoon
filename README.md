@@ -2,7 +2,7 @@
 
 <img width="1320" height="803" alt="RecoonLogo" src="https://github.com/user-attachments/assets/93ccd19d-042d-491c-a954-33c18ddf7876"/>
 
-# What is 🦝
+## What is 🦝
 A Python script that uses an LLM (locally via Ollama, free, or the Claude API as a paid option) to take a first pass at huge lists of recon URLs and flag the most interesting ones to investigate manually during a bug bounty engagement.
 
 It doesn't replace manual testing: it just helps you decide **where to start looking** among thousands of URLs.
