@@ -1,12 +1,13 @@
-# RECOON
-<img width="1374" height="693" alt="recoon" src="https://github.com/user-attachments/assets/b7c69fae-4408-4241-9920-2c129afda391" />
+# 🦝 RECOON
 
+<img width="1320" height="803" alt="RecoonLogo" src="https://github.com/user-attachments/assets/93ccd19d-042d-491c-a954-33c18ddf7876"/>
 
+# What is 🦝
 A Python script that uses an LLM (locally via Ollama, free, or the Claude API as a paid option) to take a first pass at huge lists of recon URLs and flag the most interesting ones to investigate manually during a bug bounty engagement.
 
 It doesn't replace manual testing: it just helps you decide **where to start looking** among thousands of URLs.
 
-## What it does
+## What 🦝 does
 
 - Cleans up the URL list (drops static assets like images/CSS/fonts, deduplicates while ignoring tracking parameters like `utm_source`/`fbclid`)
 - Prioritizes the most "interesting" URLs using keywords (`api`, `admin`, `debug`, `id=`, `.git`, etc.) and, when available, HTTP status code/content-type
@@ -17,7 +18,7 @@ It doesn't replace manual testing: it just helps you decide **where to start loo
 - Lets you re-run the analysis on a new recon dump while only analyzing **new URLs** compared to last time (`--diff-only`)
 - Automatically retries failed batches, and can resume a run that was interrupted midway
 
-## Requirements
+## What 🦝 require
 
 - Python 3.9 or higher
 - [Ollama](https://ollama.com) installed and running (`ollama serve`), with at least one model pulled
@@ -29,7 +30,7 @@ pip install requests
 
 (`requests` is probably already installed on your system; if not, use `pip3 install requests --break-system-packages` on macOS with the system Python)
 
-## Recommended models
+## 🦝 recommends models
 
 The script defaults to `llama3`, but for this kind of task (classification/structured JSON output) models built specifically for function calling/JSON tend to do better:
 
@@ -40,7 +41,7 @@ ollama pull hermes2-pro
 
 Then use them with `--model qwen2.5:7b` (double-check with `ollama list` what the exact tag of your downloaded model actually is).
 
-## Basic usage
+## 🦝 basic usage
 
 ```
 python3 recoon.py URLS.txt --target "example.com" --domain-filter "example.com"
@@ -98,7 +99,7 @@ python3 recoon.py URLS.txt --target "example.com" --provider claude
 
 Without specifying `--model` it will use `claude-haiku-4-5-20251001` (the cheapest one). API usage is paid and billed per token: for an analysis of a few hundred URLs the typical cost is a few cents of a dollar, but it's still a cost, unlike Ollama.
 
-## Main options
+## 🦝 main options
 
 | Option | Description | Default |
 |---|---|---|
