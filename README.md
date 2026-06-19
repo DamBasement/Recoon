@@ -18,7 +18,7 @@ It doesn't replace manual testing: it just helps you decide **where to start loo
 - Lets you re-run the analysis on a new recon dump while only analyzing **new URLs** compared to last time (`--diff-only`)
 - Automatically retries failed batches, and can resume a run that was interrupted midway
 
-## What 🦝 require
+## What 🦝 requires
 
 - Python 3.9 or higher
 - [Ollama](https://ollama.com) installed and running (`ollama serve`), with at least one model pulled
