@@ -292,9 +292,12 @@ Respond ONLY in JSON format with this exact structure:
 
 def call_ollama(prompt_lines: list[str], model: str, ollama_url: str, target: str,
                  timeout: int, batch_label: str, max_retries: int, retry_delay: int,
-                 temperature: float, seed: int | None) -> dict | None:
+                 temperature: float, seed: int | None, max_tokens: int = 2048) -> dict | None:
     prompt = build_analysis_prompt(prompt_lines, target)
-    options = {"temperature": temperature}
+    # num_predict caps the output tokens — prevents the model from going
+    # into an infinite loop on "interesting" batches (seen: 25k+ tokens).
+    # 2048 is more than enough for a full JSON response on 50 URLs.
+    options = {"temperature": temperature, "num_predict": max_tokens}
     if seed is not None:
         options["seed"] = seed
 
@@ -599,7 +602,7 @@ def analyze_recon(file_path: str, model: str, ollama_url: str,
                    max_retries: int, retry_delay: int, resume: bool,
                    markdown_path: str, temperature: float, seed: int | None,
                    provider: str, api_key: str | None, diff_only: bool,
-                   seen_urls_path: str, findings_db_path: str):
+                   seen_urls_path: str, findings_db_path: str, max_tokens: int):
 
     print("[*] Loading and cleaning the URL list...")
     records = read_raw_lines(file_path)
@@ -672,7 +675,7 @@ def analyze_recon(file_path: str, model: str, ollama_url: str,
         else:
             result = call_ollama(batch, model, ollama_url, target, timeout,
                                   batch_label, max_retries, retry_delay,
-                                  temperature, seed)
+                                  temperature, seed, max_tokens)
         elapsed = time.time() - batch_start
 
         if result and "target_analysis" in result:
@@ -832,6 +835,9 @@ def main():
     parser.add_argument("--temperature", type=float, default=0.1,
                          help="Sampling temperature. Lower (e.g. 0) = more consistent results "
                               "across runs; higher = more varied/creative. Default: 0.1.")
+    parser.add_argument("--max-tokens", type=int, default=2048,
+                         help="Maximum tokens the model can generate per batch. "
+                              "Prevents runaway generation on 'interesting' batches. Default: 2048.")
     parser.add_argument("--seed", type=int, default=None,
                          help="Optional fixed seed for more reproducible results "
                               "(supported by most Ollama models, not a 100%% guarantee).")
@@ -913,6 +919,7 @@ def main():
         diff_only=args.diff_only,
         seen_urls_path=seen_urls_path,
         findings_db_path=findings_db_path,
+        max_tokens=args.max_tokens,
     )
 
 
