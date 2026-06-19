@@ -127,12 +127,20 @@ notify() {
 # ----------------------------------------------------------------
 # Arguments
 # ----------------------------------------------------------------
-[ $# -lt 1 ] && die "Usage: $0 <domain> [recoon_model]\nExample: $0 water-link.be qwen2.5:7b"
+[ $# -lt 1 ] && die "Usage: $0 <domain> [recoon_model] [--diff-only]\nExamples:\n  $0 water-link.be\n  $0 water-link.be qwen2.5:7b\n  $0 water-link.be qwen2.5:7b --diff-only"
 
 DOMAIN="$1"
 MODEL="${2:-qwen2.5:7b}"
 RECOON_SCRIPT="$(dirname "$0")/recoon.py"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+
+# Optional --diff-only flag: can be passed as any argument after the domain
+DIFF_ONLY=""
+for arg in "$@"; do
+    if [ "$arg" = "--diff-only" ]; then
+        DIFF_ONLY="--diff-only"
+    fi
+done
 
 # ----------------------------------------------------------------
 # Sanity checks
@@ -153,6 +161,7 @@ fi
 
 info "Starting recon on: ${DOMAIN}"
 info "Model for triage:  ${MODEL}"
+[ -n "$DIFF_ONLY" ] && info "Mode:              diff-only (analyzing new URLs only)"
 echo
 
 notify "🦝 *RECOON started*
@@ -262,7 +271,8 @@ python3 "$RECOON_SCRIPT" live_hosts.json \
     --domain-filter "$DOMAIN" \
     --model "$MODEL" \
     --output "recon_report_hosts_${TIMESTAMP}.json" \
-    --markdown-output "recon_report_hosts_${TIMESTAMP}.md"
+    --markdown-output "recon_report_hosts_${TIMESTAMP}.md" \
+    $DIFF_ONLY
 
 echo
 info "Launching RECOON triage — pass 2/2: historical URLs (${URL_COUNT} total)..."
@@ -273,7 +283,8 @@ python3 "$RECOON_SCRIPT" all_urls.txt \
     --domain-filter "$DOMAIN" \
     --model "$MODEL" \
     --output "recon_report_urls_${TIMESTAMP}.json" \
-    --markdown-output "recon_report_urls_${TIMESTAMP}.md"
+    --markdown-output "recon_report_urls_${TIMESTAMP}.md" \
+    $DIFF_ONLY
 
 echo
 success "All done! Files:"
@@ -286,6 +297,7 @@ success "  recon_report_urls_${TIMESTAMP}.json  / .md  (historical URLs triage)"
 
 notify "✅ *RECOON complete*
 Target: \`${DOMAIN}\`
+Mode: ${DIFF_ONLY:-full}
 📡 Subdomains: ${SUBS_COUNT}
 🟢 Live hosts: ${LIVE_COUNT}
 🔗 URLs collected: ${URL_COUNT}
