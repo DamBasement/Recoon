@@ -3,26 +3,20 @@
 #  recon.sh — Passive recon pipeline + RECOON triage
 #
 #  Usage:
-#    ./recon.sh <domain> [recoon_model]
+#    ./recon.sh <domain> [recoon_model] [--diff-only]
 #
 #  Examples:
 #    ./recon.sh water-link.be
-#    ./recon.sh water-link.be qwen2.5:14b
-#
-#  Telegram notifications (optional):
-#    export TELEGRAM_BOT_TOKEN="123456:ABCdef..."
-#    export TELEGRAM_CHAT_ID="5874393060"
-#    If not set, notifications are silently skipped.
-#    Never put these values directly in this file — use .env or
-#    export them in your shell profile (~/.zshrc / ~/.bashrc).
+#    ./recon.sh water-link.be qwen2.5:7b
+#    ./recon.sh water-link.be qwen2.5:7b --diff-only
 #
 #  Output files (all in the current working directory):
-#    subs.txt            — raw subdomains from subfinder + amass
-#    live_hosts.txt      — subdomains that actually respond (httpx)
-#    live_hosts.json     — httpx output with status/tech/title
-#    all_urls.txt        — historical URLs from gau
-#    sensitive_files.txt — quick grep for interesting extensions/paths
-#    recon_report_*.json / .md — RECOON AI triage report
+#    subs.txt                          — raw subdomains
+#    live_hosts.txt / live_hosts.json  — validated live hosts
+#    all_urls.txt                      — historical URLs from gau
+#    sensitive_files.txt               — quick grep for interesting patterns
+#    recon_report_hosts_*.json / .md   — AI triage on live hosts
+#    recon_report_urls_*.json  / .md   — AI triage on historical URLs
 # ================================================================
 
 set -euo pipefail
@@ -107,21 +101,6 @@ require() {
     for cmd in "$@"; do
         command -v "$cmd" &>/dev/null || die "Required tool not found: $cmd — install it and retry."
     done
-}
-
-# Send a Telegram message if credentials are set in the environment.
-# Silently skipped if TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID are missing.
-notify() {
-    local message="$1"
-    if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] || [ -z "${TELEGRAM_CHAT_ID:-}" ]; then
-        return 0
-    fi
-    curl -s -X POST \
-        "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-        -d "chat_id=${TELEGRAM_CHAT_ID}" \
-        -d "text=${message}" \
-        -d "parse_mode=Markdown" \
-        > /dev/null 2>&1 || true
 }
 
 # ----------------------------------------------------------------
@@ -225,7 +204,7 @@ fi
 info "Extracting historical URLs via gau (this may take a while)..."
 
 run_with_heartbeat "gau" all_urls.txt \
-    bash -c "cat live_hosts.txt | gau --from 2023 > all_urls.txt"
+    bash -c "cat live_hosts.txt | gau --from 2023 --mc 100 > all_urls.txt"
 
 URL_COUNT=$(wc -l < all_urls.txt)
 success "Collected ${URL_COUNT} URLs → all_urls.txt"
