@@ -143,10 +143,6 @@ info "Model for triage:  ${MODEL}"
 [ -n "$DIFF_ONLY" ] && info "Mode:              diff-only (analyzing new URLs only)"
 echo
 
-notify "🦝 *RECOON started*
-Target: \`${DOMAIN}\`
-Model: \`${MODEL}\`"
-
 # ----------------------------------------------------------------
 # 1. Subdomain enumeration
 # ----------------------------------------------------------------
@@ -165,9 +161,6 @@ rm -f subs_subfinder.txt subs_amass.txt
 
 SUBS_COUNT=$(wc -l < subs.txt)
 success "Found ${SUBS_COUNT} unique subdomains → subs.txt"
-
-notify "🔍 *Subdomains found*: ${SUBS_COUNT}
-Target: \`${DOMAIN}\`"
 
 # ----------------------------------------------------------------
 # 2. Validate live hosts
@@ -273,12 +266,3 @@ success "  all_urls.txt"
 success "  sensitive_files.txt"
 success "  recon_report_hosts_${TIMESTAMP}.json / .md  (live hosts triage)"
 success "  recon_report_urls_${TIMESTAMP}.json  / .md  (historical URLs triage)"
-
-notify "✅ *RECOON complete*
-Target: \`${DOMAIN}\`
-Mode: ${DIFF_ONLY:-full}
-📡 Subdomains: ${SUBS_COUNT}
-🟢 Live hosts: ${LIVE_COUNT}
-🔗 URLs collected: ${URL_COUNT}
-⚠️ Sensitive patterns: ${SENSITIVE_COUNT}
-📄 Reports: \`recon_report_hosts_${TIMESTAMP}.md\` + \`recon_report_urls_${TIMESTAMP}.md\`"
